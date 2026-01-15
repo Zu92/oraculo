@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oráculo Online</title>
+    <style>
+        body { font-family: 'Georgia', serif; background: #121212; color: #e0e0e0; text-align: center; padding: 20px; }
+        .controles { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        select, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; font-size: 1rem; }
+        button { background: #d4af37; color: #121212; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #f1c40f; }
+        .tablero { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .card { background: #252525; border: 1px solid #d4af37; border-radius: 10px; padding: 15px; width: 280px; box-shadow: 0 6px 15px rgba(0,0,0,0.7); }
+        .card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
+        .card h3 { color: #d4af37; margin-top: 0; }
+        .card p { font-size: 0.9rem; line-height: 1.4; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <h1>Consúltale al Destino</h1>
+
+    <div class="controles">
+        <label>Mazo:</label>
+        <select id="oraculo-select">
+            <option value="rosa">Rosa</option>
+            <option value="gotico">Gótico</option>
+            <option value="japones">Japonés</option>
+            <option value="navegante">Navegante</option>
+        </select>
+
+        <label>Cartas:</label>
+        <select id="cantidad-select">
+            <option value="1">1 Carta (Respuesta)</option>
+            <option value="3">3 Cartas (Pasado/Presente/Futuro)</option>
+        </select>
+
+        <button onclick="realizarTirada()">Revelar Cartas</button>
+    </div>
+    </div>
+    </div>
+
+    <div id="tablero" class="tablero">
+        </div>
+
+    <script>
+        async function realizarTirada() {
+    const oraculo = document.getElementById('oraculo-select').value;
+    const cantidad = document.getElementById('cantidad-select').value;
+    const tablero = document.getElementById('tablero');
+
+    try {
+        const response = await fetch(`/tirar?oraculo=${oraculo}&cantidad=${cantidad}`);
+        const data = await response.json(); // Ahora recibimos un objeto con {cartas, estilo}
+
+        // 1. Aplicamos los estilos al cuerpo de la página
+        document.body.style.background = data.estilo.background;
+        document.body.style.color = data.estilo.text_color;
+        document.querySelector('h1').innerText = data.estilo.titulo;
+
+        // 2. Dibujamos las cartas con sus propios colores
+        tablero.innerHTML = "";
+        data.cartas.forEach(carta => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card';
+            
+            // Aplicamos los colores de la carta dinámicamente
+            cardDiv.style.backgroundColor = data.estilo.card_background;
+            
+            cardDiv.innerHTML = `
+                <h3 style="color: ${data.estilo.card_color}">${carta.nombre}</h3>
+                <img src="/static/${carta.imagen}" alt="${carta.nombre}" class="card-img">
+                <p><strong>Descripción:</strong> ${carta.descripcion}</p>
+                <p><strong>Acción:</strong> ${carta.accion}</p>
+            `;
+            tablero.appendChild(cardDiv);
+        });
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+
+    </script>
+</body>
+</html>
+
