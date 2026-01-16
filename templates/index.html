@@ -3,122 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oráculo Online</title>
+    <title>EcodelInterior - Oráculo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        body { font-family: 'Georgia', serif; background: #121212; color: #e0e0e0; text-align: center; padding: 20px; }
-        .controles { background: #1e1e1e; padding: 20px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        body {
+            font-family: 'Georgia', serif;
+            background: #121212;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 0;
+            padding-bottom: 50px;
+        }
+
+        .page-header {
+            padding: 30px 20px;
+            background: rgba(20, 20, 20, 0.8);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .marca-principal { color: #d4af37; font-size: 2.2rem; margin: 0; letter-spacing: 2px; }
+        .frase-marca { font-size: 1.1rem; margin: 10px 0 0 0; font-weight: normal; font-style: italic; opacity: 0.9; }
+
+        #instructivo {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px dashed #d4af37;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: left;
+            display: inline-block;
+        }
+        #instructivo h3 { color: #d4af37; margin-top: 0; font-size: 1.1rem; text-align: center; }
+        #instructivo ul { list-style: none; padding: 0; margin: 0; }
+        #instructivo li { margin-bottom: 8px; font-size: 0.95rem; }
+
+        .controles { padding: 20px; margin: 10px auto; display: block; }
+
+        /* BOTONES EN UNA SOLA FILA */
+        .fila-botones { 
+            margin-top: 15px; 
+            display: flex; 
+            flex-direction: row; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px; 
+        }
+
         select, button { padding: 10px; margin: 5px; border-radius: 5px; border: none; font-size: 1rem; }
         button { background: #d4af37; color: #121212; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: #f1c40f; }
-        .tablero { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .card { background: #252525; border: 1px solid #d4af37; border-radius: 10px; padding: 15px; width: 280px; box-shadow: 0 6px 15px rgba(0,0,0,0.7); }
+
+        #captura-area {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: inherit;
+        }
+
+        .subtitulo-mazo {
+            color: #d4af37;
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .tablero { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+
+        .card {
+            background: #252525;
+            border: 1px solid #d4af37;
+            border-radius: 10px;
+            padding: 12px;
+            width: 250px;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
         .card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
-        .card h3 { color: #d4af37; margin-top: 0; }
-        .card p { font-size: 0.9rem; line-height: 1.4; text-align: left; }
+        .posicion-titulo { font-size: 0.75rem; color: #d4af37; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            font-size: 0.85rem;
+        }
+        .footer-link { color: #d4af37; text-decoration: none; font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .fila-botones { flex-direction: column; }
+            .tablero { flex-direction: column; align-items: center; }
+            .card { width: 90%; }
+        }
     </style>
 </head>
 <body>
 
+    <header class="page-header">
+        <h1 class="marca-principal">EcodelInterior</h1>
+        <h2 class="frase-marca">Bienvenid@, consulta tus cartas y escucha tu eco</h2>
+    </header>
 
-    <h1>Consúltale al Destino</h1>
-
+    <div id="instructivo">
+        <h3>Cómo realizar tu consulta:</h3>
+        <ul>
+            <li>✨ 1- Elije uno de nuestros oráculos.</li>
+            <li>🃏 2- Elije la cantidad de cartas (1 para un mensaje directo / 3 para un mensaje combinado).</li>
+            <li>🔮 3- Conversa con tu interior para entender su significado.</li>
+        </ul>
+    </div>
 
     <div class="controles">
-        <label>Mazo:</label>
         <select id="oraculo-select">
             <option value="rosa">Rosa</option>
             <option value="gotico">Gótico</option>
             <option value="japones">Japonés</option>
             <option value="navegante">Navegante</option>
         </select>
-
-
-        <label>Cartas:</label>
         <select id="cantidad-select">
-            <option value="1">1 Carta (Respuesta)</option>
-            <option value="3">3 Cartas (Pasado/Presente/Futuro)</option>
+            <option value="1">1 Carta</option>
+            <option value="3">3 Cartas</option>
         </select>
+        <button id="btn-revelar" onclick="realizarTirada()">Revelar Cartas</button>
 
-
-        <button onclick="realizarTirada()">Revelar Cartas</button>
-<button id="btn-whatsapp" onclick="compartirWhatsApp()" style="background: #25D366; display: none;">
-    Compartir en WhatsApp
-</button>
-
+        <div class="fila-botones">
+            <button id="btn-whatsapp" onclick="compartirWhatsApp()" style="background: #25D366; color: white; display: none; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 448 512" fill="white">
+                    <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-5.5-2.8-23.2-8.5-44.2-27.1-16.4-14.6-27.4-32.7-30.6-38.2-3.2-5.6-.3-8.6 2.4-11.4 2.5-2.5 5.5-6.5 8.3-9.8 2.8-3.3 3.7-5.6 5.5-9.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 13.2 5.8 23.5 9.2 31.5 11.8 13.3 4.2 25.4 3.6 35 2.2 10.7-1.5 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+                </svg>
+                Compartir
+            </button>
+            <button id="btn-pdf" onclick="descargarPDF()" style="background: #e74c3c; color: white; display: none;">Descargar PDF</button>
+        </div>
     </div>
-    </div>
-    </div>
 
-
-    <div id="tablero" class="tablero">
+    <div id="captura-area">
+        <div id="pdf-only-header" style="display: none; margin-bottom: 20px;">
+            <h1 style="color: #d4af37; margin:0; font-size: 1.8rem;">EcodelInterior</h1>
+            <p style="font-style: italic; margin: 5px 0;">Escucha tu eco</p>
         </div>
 
+        <h3 id="nombre-mazo" class="subtitulo-mazo"></h3>
+        <div id="tablero" class="tablero"></div>
+
+        <footer>
+            <div id="footer-flex" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <p style="margin: 0;">Seguinos en Instagram: <a class="footer-link" href="https://instagram.com/ecodelinterior" target="_blank">@ecodelinterior</a></p>
+                <p style="margin: 0;">Tienda Online: <a class="footer-link" href="https://ecodelinterior.mitiendanube.com/" target="_blank">ecodelinterior.mitiendanube.com</a></p>
+            </div>
+        </footer>
+    </div>
 
     <script>
-        let cartasActuales = []; // Aquí guardaremos los nombres de las cartas
+        let cartasActuales = [];
+
         async function realizarTirada() {
-    const oraculo = document.getElementById('oraculo-select').value;
-    const cantidad = document.getElementById('cantidad-select').value;
-    const tablero = document.getElementById('tablero');
+            document.getElementById('instructivo').style.display = 'none';
+            const oraculo = document.getElementById('oraculo-select').value;
+            const cantidad = document.getElementById('cantidad-select').value;
+            const titulos3 = ["Pasado / Raíz", "Presente / Situación", "Futuro / Destino"];
 
+            try {
+                const response = await fetch(`/tirar?oraculo=${oraculo}&cantidad=${cantidad}`);
+                const data = await response.json();
+                cartasActuales = data.cartas;
 
-    try {
-        const response = await fetch(`/tirar?oraculo=${oraculo}&cantidad=${cantidad}`);
-        const data = await response.json(); // Ahora recibimos un objeto con {cartas, estilo}
-        cartasActuales = data.cartas; // Guardamos solo los nombres
-        document.getElementById('btn-whatsapp').style.display = 'inline-block'; // Mostramos el botón de compartir
+                document.body.style.background = data.estilo.background;
+                document.getElementById('nombre-mazo').innerText = data.estilo.titulo;
+                document.getElementById('btn-revelar').innerText = "Nueva Tirada";
 
+                const tablero = document.getElementById('tablero');
+                tablero.innerHTML = "";
 
-        // 1. Aplicamos los estilos al cuerpo de la página
-        document.body.style.background = data.estilo.background;
-        document.body.style.color = data.estilo.text_color;
-        document.querySelector('h1').innerText = data.estilo.titulo;
+                data.cartas.forEach((carta, index) => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'card';
+                    cardDiv.style.backgroundColor = data.estilo.card_background;
+                    cardDiv.style.borderColor = data.estilo.card_color;
 
+                    let pos = data.cartas.length === 3 ? `<div class="posicion-titulo">${titulos3[index]}</div>` : "";
 
-        // 2. Dibujamos las cartas con sus propios colores
-        tablero.innerHTML = "";
-        data.cartas.forEach(carta => {
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'card';
+                    cardDiv.innerHTML = `
+                        ${pos}
+                        <h3 style="color: ${data.estilo.card_color}; margin-top:0; font-size:1.1rem;">${carta.nombre}</h3>
+                        <img src="/static/${carta.imagen}" alt="${carta.nombre}">
+                        <p style="font-size:0.9rem;"><strong>Descripción:</strong> ${carta.descripcion}</p>
+                        <p style="font-size:0.9rem;"><strong>Acción:</strong> ${carta.accion}</p>
+                    `;
+                    tablero.appendChild(cardDiv);
+                });
+
+                document.getElementById('btn-whatsapp').style.display = 'inline-flex';
+                document.getElementById('btn-pdf').style.display = 'inline-block';
+            } catch (e) { console.error(e); }
+        }
+
+        function descargarPDF() {
+            const elemento = document.getElementById('captura-area');
+            const tablero = document.getElementById('tablero');
+            const footerFlex = document.getElementById('footer-flex');
+            const cards = document.querySelectorAll('.card');
+            const pdfHeader = document.getElementById('pdf-only-header');
+            const cantidad = cartasActuales.length;
            
-            // Aplicamos los colores de la carta dinámicamente
-            cardDiv.style.backgroundColor = data.estilo.card_background;
-           
-            cardDiv.innerHTML = `
-                <h3 style="color: ${data.estilo.card_color}">${carta.nombre}</h3>
-                <img src="/static/${carta.imagen}" alt="${carta.nombre}" class="card-img">
-                <p><strong>Descripción:</strong> ${carta.descripcion}</p>
-                <p><strong>Acción:</strong> ${carta.accion}</p>
-            `;
-            tablero.appendChild(cardDiv);
-        })
-        
-        ;
-    } catch (error) {
-        console.error("Error:", error);
-    }
-}
-function compartirWhatsApp() {
-    const urlApp = window.location.href;
+            const originalFlex = tablero.style.flexWrap;
+            const originalFontSize = elemento.style.fontSize;
+            const originalFooterDir = footerFlex.style.flexDirection;
 
-    // Encabezado del mensaje
-    let mensaje = `*Mi tirada del Oráculo* \n\n`;
+            if (cantidad === 3) {
+                tablero.style.flexWrap = 'nowrap';
+                elemento.style.fontSize = '0.75rem';
+                footerFlex.style.flexDirection = 'row';
+                footerFlex.style.justifyContent = 'center';
+                footerFlex.style.gap = '25px';
+               
+                cards.forEach(c => {
+                    c.style.width = '210px';
+                    c.style.padding = '8px';
+                });
+            }
 
-    // Recorremos cada carta guardada para sumarla al mensaje
-    cartasActuales.forEach((carta, index) => {
-        mensaje += `*${carta.nombre}*\n`;
-        mensaje += `*Asociaciones:*_${carta.descripcion}_\n`;
-        mensaje += `*Acción:* ${carta.accion}\n\n`;
-    });
+            pdfHeader.style.display = 'block';
 
-    // Pie del mensaje con tu frase personalizada
-    mensaje += `Para tener tus cartas obtenelas acá: ${urlApp}`;
+            const opciones = {
+                margin: [5, 5, 5, 5],
+                filename: 'Tirada_EcodelInterior.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    scrollY: 0, // FUERZA LA CAPTURA DESDE EL TOP
+                    scrollX: 0
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: cantidad === 3 ? 'landscape' : 'portrait' }
+            };
 
-    // Codificamos y abrimos
-    const linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-    window.open(linkWhatsApp, '_blank');
-}
+            html2pdf().set(opciones).from(elemento).save().then(() => {
+                pdfHeader.style.display = 'none';
+                tablero.style.flexWrap = originalFlex;
+                elemento.style.fontSize = originalFontSize;
+                footerFlex.style.flexDirection = originalFooterDir;
+               
+                if (cantidad === 3) {
+                    cards.forEach(c => {
+                        c.style.width = '250px';
+                        c.style.padding = '12px';
+                    });
+                }
+            });
+        }
 
+        function compartirWhatsApp() {
+            const titulo = "🔮 *Mi tirada en EcodelInterior* 🔮";
+            const linkWeb = window.location.href;
+            let mensaje = titulo + "\n\n";
+
+            cartasActuales.forEach(c => {
+                mensaje += `🃏 *${c.nombre}*\n📜 _${c.descripcion}_\n✨ *Acción:* ${c.accion}\n\n`;
+            });
+
+            mensaje += `Obtené tus cartas acá: ${linkWeb}\nInstagram: instagram.com/ecodelinterior\nVisita nuestra Tienda: ecodelinterior.mitiendanube.com`;
+            const urlFinal = "https://api.whatsapp.com/send?text=" + encodeURIComponent(mensaje);
+            window.open(urlFinal, '_blank');
+        }
     </script>
 </body>
 </html>
