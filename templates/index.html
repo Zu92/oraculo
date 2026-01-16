@@ -41,6 +41,10 @@
 
 
         <button onclick="realizarTirada()">Revelar Cartas</button>
+<button id="btn-whatsapp" onclick="compartirWhatsApp()" style="background: #25D366; display: none;">
+    Compartir en WhatsApp
+</button>
+
     </div>
     </div>
     </div>
@@ -51,6 +55,7 @@
 
 
     <script>
+        let cartasActuales = []; // Aquí guardaremos los nombres de las cartas
         async function realizarTirada() {
     const oraculo = document.getElementById('oraculo-select').value;
     const cantidad = document.getElementById('cantidad-select').value;
@@ -60,6 +65,8 @@
     try {
         const response = await fetch(`/tirar?oraculo=${oraculo}&cantidad=${cantidad}`);
         const data = await response.json(); // Ahora recibimos un objeto con {cartas, estilo}
+        cartasActuales = data.cartas; // Guardamos solo los nombres
+        document.getElementById('btn-whatsapp').style.display = 'inline-block'; // Mostramos el botón de compartir
 
 
         // 1. Aplicamos los estilos al cuerpo de la página
@@ -84,14 +91,33 @@
                 <p><strong>Acción:</strong> ${carta.accion}</p>
             `;
             tablero.appendChild(cardDiv);
-        });
+        })
+        
+        ;
     } catch (error) {
         console.error("Error:", error);
     }
 }
+function compartirWhatsApp() {
+    const urlApp = window.location.href;
 
+    // Encabezado del mensaje
+    let mensaje = `*Mi tirada del Oráculo* \n\n`;
 
+    // Recorremos cada carta guardada para sumarla al mensaje
+    cartasActuales.forEach((carta, index) => {
+        mensaje += `*${carta.nombre}*\n`;
+        mensaje += `*Asociaciones:*_${carta.descripcion}_\n`;
+        mensaje += `*Acción:* ${carta.accion}\n\n`;
+    });
 
+    // Pie del mensaje con tu frase personalizada
+    mensaje += `Para tener tus cartas obtenelas acá: ${urlApp}`;
+
+    // Codificamos y abrimos
+    const linkWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    window.open(linkWhatsApp, '_blank');
+}
 
     </script>
 </body>
